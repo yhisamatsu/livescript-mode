@@ -425,8 +425,7 @@ STATE is a return value of `syntax-ppss'."
 	 nil nil (("-_$" . "w")) nil
 	 (font-lock-syntactic-face-function
 	  . livescript-syntactic-face-function)
-	 (parse-sexp-lookup-properties . t))
-       (livescript--make-font-lock-defaults))
+	 (parse-sexp-lookup-properties . t)))
   ;; Syntactic fontification
   (set (make-local-variable 'livescript--unclosed-positions)
        (livescript--make-unclosed-positions))
