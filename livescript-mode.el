@@ -36,7 +36,7 @@
 
 (defgroup livescript nil
   "Major mode for editing LiveScript code."
-  :link '(custom-group-link :tag "Font Lock Faces group" font-lock-faces)
+  :prefix "livescript-"
   :group 'languages)
 
 (defgroup livescript-faces nil
