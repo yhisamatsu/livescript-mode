@@ -330,7 +330,7 @@ Complex syntax elements are heredocument, string list and heregexp.")
 	    ;; /regular-expression/
 	    ((concat "\\(?:^\\|\\W\\)"
 		     "\\(/\\)"
-		     "\\(?:\\\\.\\|\\[\\(?:\\\\.\\|.\\)+\\]\\|[^/\n]\\)+"
+		     "\\(?:\\\\.\\|\\[\\(?:\\\\.\\|.\\)+\\]\\|[^*/\n]\\)+"
 		     "\\(/\\)"
 		     "[gimy$?]\\{0,4\\}")
 	     (1 "\"/") (2 "\"/"))
