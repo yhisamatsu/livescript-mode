@@ -82,10 +82,9 @@
 ;;
 ;; Face
 ;;
-
 (defface livescript-font-lock-bold-face
   '((t :inherit bold))
-  "Font Lock mode face used to highlight builtins in LiveScript regexps."
+  "Font Lock mode face used to highlight interpolation in LiveScript regexps."
   :group 'livescript-faces)
 
 
@@ -173,9 +172,11 @@
 (defun livescript-interpolation-matcher (bound)
   "Function to match interpolation."
   (catch 'found
-    (while (re-search-forward "\\(\\(?2:#\\)\\(?:{.+?}\\|\\w+\\)\\)" bound t)
+    (while (re-search-forward
+			"\\(#\\(?:{\\(?2:.*?\\)\\}\\|\\w+\\)\\)"
+			bound t)
       (let ((face         (livescript--get-face   (1- (point))))
-            (syntax-class (livescript--get-syntax (match-beginning 2))))
+            (syntax-class (livescript--get-syntax (match-beginning 1))))
         (when (livescript--interpolatable-p face syntax-class)
 	  (throw 'found t))))))
 
@@ -232,7 +233,8 @@
             (,livescript-context-regexp
              (1 'livescript-font-lock-shadow-face))
             (livescript-interpolation-matcher
-             (1 'livescript-font-lock-bold-face prepend))
+             (1 'livescript-font-lock-bold-face prepend)
+             (2 font-lock-string-face t t))
 	    (livescript-comment-inside-heregex-matcher
 	     (1 font-lock-comment-face prepend t)))))
 
