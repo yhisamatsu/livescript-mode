@@ -468,4 +468,52 @@ See `run-hooks'."
 
 (provide 'livescript-mode)
 
+
+;;;###compile in emacs
+;;; all this section is copy/paste awesome feature from
+;;; https://github.com/defunkt/coffee-mode
+
+(defcustom livescript-args-compile '("-c")
+  "The arguments to pass to `livescript-command' to compile a file."
+  :type 'list
+  :group 'livescript)
+
+(defcustom livescript-command "lsc"
+  "The LivescriptScript command used for evaluating code."
+  :type 'string
+  :group 'livescript)
+
+(defcustom livescript-compiled-buffer-name "*livescript-compiled*"
+  "The name of the scratch buffer used for compiled LivescriptScript."
+  :type 'string
+  :group 'livescript)
+
+(defun livescript-compile-region (start end)
+  "Compiles a region and displays the JavaScript in a buffer called
+`livescript-compiled-buffer-name'."
+  (interactive "r")
+
+  (let ((buffer (get-buffer livescript-compiled-buffer-name)))
+    (when buffer
+      (with-current-buffer buffer
+        (erase-buffer))))
+
+  (apply (apply-partially 'call-process-region start end
+                          livescript-command nil
+                          (get-buffer-create livescript-compiled-buffer-name)
+                          nil)
+         (append livescript-args-compile (list "-s" "-p")))
+
+  (let ((buffer (get-buffer livescript-compiled-buffer-name)))
+    (display-buffer buffer)
+    (with-current-buffer buffer
+      (let ((buffer-file-name "tmp.js")) (set-auto-mode)))))
+
+(defun livescript-compile-buffer ()
+  "Compiles the current buffer and displays the JavaScript in a buffer
+called `livescript-compiled-buffer-name'."
+  (interactive)
+  (save-excursion
+    (livescript-compile-region (point-min) (point-max))))
+
 ;;; livescript-mode.el ends here
