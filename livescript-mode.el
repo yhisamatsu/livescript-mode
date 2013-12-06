@@ -502,7 +502,7 @@ See `run-hooks'."
                           livescript-command nil
                           (get-buffer-create livescript-compiled-buffer-name)
                           nil)
-         (append livescript-args-compile (list "-s" "-p")))
+         (append livescript-args-compile (list "-s" "-p" "-b")))
 
   (let ((buffer (get-buffer livescript-compiled-buffer-name)))
     (display-buffer buffer)
