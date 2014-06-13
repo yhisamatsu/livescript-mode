@@ -114,14 +114,14 @@
 
 (defvar livescript-keywords-regexp
   (let* ((js-keywords    [break catch class continue delete else extends
-                          finally for if loop new return
-                          super switch throw try until while])
+                                finally for if loop new return
+                                super switch throw try until while])
          (cs-keywords    [by of own then unless when])
          (ls-keywords    [fallthrough otherwise from til to])
          (js/cs-reserved [case const debugger default do enum export
-                          function import let native var void with
-                          __extends __hasProp])
-	(keywords (vconcat js-keywords cs-keywords ls-keywords js/cs-reserved)))
+                               function import let native var void with
+                               __extends __hasProp])
+         (keywords (vconcat js-keywords cs-keywords ls-keywords js/cs-reserved)))
     (livescript--regexp-from-symbols keywords))
   "Regular expression to match ordinary keywords of LiveScript.")
 
@@ -152,15 +152,15 @@
 
 (defvar livescript-function-name-regexp
   (let* ((param     "\\s-*\\(?:\\w\\|\\.\\)+\\s-*")
-	 (default   "\\(?:\\(?:[:=?]\\|||\\)\\s-*\\|\\s-+or\\s-+\\)[^,\)]+?")
-	 (arg       (concat param "\\(?:" default "\\)?"))
-	 (args      (concat arg "\\(?:," arg "\\)*"))
-	 (arrow     "\\(?:--?\\|~~?\\)>")
-	 (anon-func (concat "!?\\s-*\\(?:(" args ")\\)?\\s-*" arrow))
-	 (func-name "\\(?1:\\w+\\)")
-	 ;; func = [(args)] ->
+         (default   "\\(?:\\(?:[:=?]\\|||\\)\\s-*\\|\\s-+or\\s-+\\)[^,\)]+?")
+         (arg       (concat param "\\(?:" default "\\)?"))
+         (args      (concat arg "\\(?:," arg "\\)*"))
+         (arrow     "\\(?:--?\\|~~?\\)>")
+         (anon-func (concat "!?\\s-*\\(?:(" args ")\\)?\\s-*" arrow))
+         (func-name "\\(?1:\\w+\\)")
+         ;; func = [(args)] ->
          (func-def1 (concat "\\_<" func-name "\\s-*[:=]\\s-*" anon-func))
-	 ;; function func [args] [(then|=>) ...]
+         ;; function func [args] [(then|=>) ...]
          (func-def2 (concat "^\\s-*[!~]?\\s-*function\\s-+" func-name)))
     (format "\\(?:%s\\|%s\\)" func-def1 func-def2))
   "Regular expression to match function names.")
@@ -178,7 +178,7 @@
       (let ((face         (livescript--get-face   (1- (point))))
             (syntax-class (livescript--get-syntax (match-beginning 1))))
         (when (livescript--interpolatable-p face syntax-class)
-	  (throw 'found t))))))
+          (throw 'found t))))))
 
 (defun livescript-comment-inside-heregex-matcher (bound)
   "Function to match comment inside heregex."
@@ -186,7 +186,7 @@
     (while (re-search-forward "\\(#\\s-.*$\\)" bound t)
       (let ((face (livescript--get-face (1- (point)))))
         (when (memq livescript-heregex-face face)
-	  (throw 'found t))))))
+          (throw 'found t))))))
 
 (defun livescript--interpolatable-p (face syntax-class)
   (and (livescript--interpolatable-face-p         face)
@@ -202,7 +202,7 @@
 
 (defun livescript--interpolatable-syntax-class-p (syntax-class)
   (not (and syntax-class
-	    (memq syntax-class livescript-interpolatable-syntax-classes))))
+            (memq syntax-class livescript-interpolatable-syntax-classes))))
 
 (defvar livescript-heregex-face 'font-lock-constant-face)
 
@@ -235,8 +235,8 @@
             (livescript-interpolation-matcher
              (1 'livescript-font-lock-bold-face prepend)
              (2 font-lock-string-face t t))
-	    (livescript-comment-inside-heregex-matcher
-	     (1 font-lock-comment-face prepend t)))))
+            (livescript-comment-inside-heregex-matcher
+             (1 font-lock-comment-face prepend t)))))
 
 (defvar livescript-font-lock-keywords livescript-font-lock-keywords-1
   "Default `font-lock-keywords' of LiveScript mode.")
@@ -265,8 +265,8 @@
 
 (defconst livescript--conflicting-syntax-classes
   (let ((string-quote   7)
-	(escape         9)
-	(comment-start 11))
+        (escape         9)
+        (comment-start 11))
     (list comment-start string-quote escape))
   "List of syntax classes which can conflict with syntax-table property.")
 
@@ -277,9 +277,9 @@ SYNTAX is a string which `string-to-syntax' accepts."
 
 (defun livescript--escape-syntax (beg end subst)
   (loop for i from beg to end
-	do (let ((class (syntax-class (syntax-after i))))
-	     (when (memq class livescript--conflicting-syntax-classes)
-	       (livescript--put-syntax i (1+ i) subst)))))
+        do (let ((class (syntax-class (syntax-after i))))
+             (when (memq class livescript--conflicting-syntax-classes)
+               (livescript--put-syntax i (1+ i) subst)))))
 
 (defun livescript--put-enclosing-syntax (beg end syntax &optional subst)
   (livescript--put-syntax beg (1+ beg) syntax)
@@ -315,42 +315,42 @@ Complex syntax elements are heredocument, string list and heregexp.")
   "Return a function used for highlighting codes syntactically."
   ;; prepare rules
   (let ((skip-comment '("\\(\\s<.*\\)$" (1 (ignore))))
-	(heredoc1     (livescript--multiline-rule "'''"    nil "\"" "'"))
-	(heredoc2     (livescript--multiline-rule "\"\"\"" nil "\"" "_"))
-	(skip-string  '("\\([^\"'\\]\\s\"\\S\"+?\\s\"\\)" (1 (ignore))))
-	(string-list  (livescript--multiline-rule "<\\[" "\\]>" "|"))
-	(heregex      (livescript--multiline-rule "//"     nil "\"/")))
+        (heredoc1     (livescript--multiline-rule "'''"    nil "\"" "'"))
+        (heredoc2     (livescript--multiline-rule "\"\"\"" nil "\"" "_"))
+        (skip-string  '("\\([^\"'\\]\\s\"\\S\"+?\\s\"\\)" (1 (ignore))))
+        (string-list  (livescript--multiline-rule "<\\[" "\\]>" "|"))
+        (heregex      (livescript--multiline-rule "//"     nil "\"/")))
     ;; embed rules before calling macro
     (eval `(syntax-propertize-rules
-	    ,skip-comment
-	    ,heredoc1
-	    ,heredoc2
-	    ,skip-string
-	    ,string-list
-	    ,heregex
+            ,skip-comment
+            ,heredoc1
+            ,heredoc2
+            ,skip-string
+            ,string-list
+            ,heregex
 
-	    ;; /regular-expression/
-	    ((concat "\\(?:^\\|\\W\\)"
-		     "\\(/\\)"
-		     "\\(?:\\\\.\\|\\[\\(?:\\\\.\\|.\\)+\\]\\|[^*/\n]\\)"
-		     "\\(?:\\\\.\\|\\[\\(?:\\\\.\\|.\\)+\\]\\|[^/\n]\\)*"
-		     "\\(/\\)"
-		     "[gimy$?]\\{0,4\\}")
-	     (1 "\"/") (2 "\"/"))
+            ;; /regular-expression/
+            ((concat "\\(?:^\\|\\W\\)"
+                     "\\(/\\)"
+                     "\\(?:\\\\.\\|\\[\\(?:\\\\.\\|.\\)+\\]\\|[^*/\n]\\)"
+                     "\\(?:\\\\.\\|\\[\\(?:\\\\.\\|.\\)+\\]\\|[^/\n]\\)*"
+                     "\\(/\\)"
+                     "[gimy$?]\\{0,4\\}")
+             (1 "\"/") (2 "\"/"))
 
-	    ;; \string
-	    ("\\(\\\\[^[:space:]\n][^]}\),;[:space:]\n]*\\)"
-	     (1 (ignore
-	    	 (livescript--put-enclosing-syntax
-	    	  (match-beginning 1) (match-end 1) "|" "'"))))
+            ;; \string
+            ("\\(\\\\[^[:space:]\n][^]}\),;[:space:]\n]*\\)"
+             (1 (ignore
+                 (livescript--put-enclosing-syntax
+                  (match-beginning 1) (match-end 1) "|" "'"))))
 
-	    ;; unclosed multiline literals
-	    ((let ((complex (mapcar #'symbol-name livescript-complex-syntax)))
-	       (concat "\\(" (livescript--join-string complex "\\|") "\\)"))
-	     (1 (ignore
-	    	 (puthash (intern-soft (match-string 1)) (match-beginning 1)
-	    		  livescript--unclosed-positions))))
-	    ))))
+            ;; unclosed multiline literals
+            ((let ((complex (mapcar #'symbol-name livescript-complex-syntax)))
+               (concat "\\(" (livescript--join-string complex "\\|") "\\)"))
+             (1 (ignore
+                 (puthash (intern-soft (match-string 1)) (match-beginning 1)
+                          livescript--unclosed-positions))))
+            ))))
 
 (defconst livescript-syntax-propertize-function
   (livescript--make-syntax-propertize-function))
@@ -367,8 +367,8 @@ Complex syntax elements are heredocument, string list and heregexp.")
          (min-unclosed (livescript-minimum-unclosed)))
     (when min-unclosed
       (save-excursion
-	(goto-char (cdr min-unclosed))
-	(setq new-start (line-beginning-position)))
+        (goto-char (cdr min-unclosed))
+        (setq new-start (line-beginning-position)))
       (livescript--clear-unclosed-positions))
     (cons new-start new-end)))
 
@@ -376,13 +376,13 @@ Complex syntax elements are heredocument, string list and heregexp.")
   "Return the position where the first unclosed syntax appears."
   (let (kv-alist)
     (maphash #'(lambda (k v) (when v (push (cons k v) kv-alist)))
-	     livescript--unclosed-positions)
+             livescript--unclosed-positions)
     (when kv-alist
       (car (sort kv-alist #'(lambda (a b) (< (cdr a) (cdr b))))))))
 
 (defun livescript--clear-unclosed-positions ()
   (maphash #'(lambda (k v) (puthash k nil livescript--unclosed-positions))
-	   livescript--unclosed-positions))
+           livescript--unclosed-positions))
 
 (defun livescript-font-lock-extend-region-function ()
   (let ((min-unclosed (livescript-minimum-unclosed)))
@@ -424,11 +424,11 @@ STATE is a return value of `syntax-ppss'."
   ;; Font-lock
   (set (make-local-variable 'font-lock-defaults)
        '((livescript-font-lock-keywords
-	  livescript-font-lock-keywords-1 livescript-font-lock-keywords-2)
-	 nil nil (("-_$" . "w")) nil
-	 (font-lock-syntactic-face-function
-	  . livescript-syntactic-face-function)
-	 (parse-sexp-lookup-properties . t)))
+          livescript-font-lock-keywords-1 livescript-font-lock-keywords-2)
+         nil nil (("-_$" . "w")) nil
+         (font-lock-syntactic-face-function
+          . livescript-syntactic-face-function)
+         (parse-sexp-lookup-properties . t)))
   ;; Syntactic fontification
   (set (make-local-variable 'livescript--unclosed-positions)
        (livescript--make-unclosed-positions))
