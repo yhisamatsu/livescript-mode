@@ -364,10 +364,11 @@ Complex syntax elements are heredocument, string list and heregexp.")
 
 (defvar livescript-syntax-propertize-extend-region-functions
   (append
-   '(livescript-syntax-propertize-extend-region-function)
+   '(livescript-syntax-propertize-extend-region-function-1)
+   '(livescript-syntax-propertize-extend-region-function-2)
    syntax-propertize-extend-region-functions))
 
-(defun livescript-syntax-propertize-extend-region-function (start end)
+(defun livescript-syntax-propertize-extend-region-function-1 (start end)
   "Fix the range of syntax propertization from START to END."
   (let* ((new-start start)
          (new-end end)
@@ -377,6 +378,17 @@ Complex syntax elements are heredocument, string list and heregexp.")
         (goto-char (cdr min-unclosed))
         (setq new-start (line-beginning-position)))
       (livescript--clear-unclosed-positions))
+    (cons new-start new-end)))
+
+(defun livescript-syntax-propertize-extend-region-function-2 (start end)
+  "Fix the range of syntax propertization from START to END."
+  (let ((new-start start)
+        (new-end end))
+    (save-excursion
+      (goto-char start)
+      (when (and (prog1 (zerop (forward-line -1)) (end-of-line))
+                 (get-text-property (point) 'syntax-multiline))
+        (setq new-start (point))))
     (cons new-start new-end)))
 
 (defun livescript-minimum-unclosed ()
