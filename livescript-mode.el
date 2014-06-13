@@ -236,9 +236,14 @@
              (1 'livescript-font-lock-shadow-face))
             (livescript-interpolation-matcher
              (1 'livescript-font-lock-bold-face prepend)
-             (2 font-lock-string-face t t))
+             (2 (livescript--font-lock-pop-bold-face) t t))
             (livescript-comment-inside-heregex-matcher
              (1 font-lock-comment-face prepend t)))))
+
+(defun livescript--font-lock-pop-bold-face ()
+  (let* ((pop-beginning-position (match-beginning 2))
+         (face (get-text-property pop-beginning-position 'face)))
+    (when face (remove 'livescript-font-lock-bold-face face))))
 
 (defvar livescript-font-lock-keywords livescript-font-lock-keywords-1
   "Default `font-lock-keywords' of LiveScript mode.")
