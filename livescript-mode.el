@@ -180,6 +180,8 @@
         (when (livescript--interpolatable-p face syntax-class)
           (throw 'found t))))))
 
+(defvar livescript-heregex-face 'font-lock-constant-face)
+
 (defun livescript-comment-inside-heregex-matcher (bound)
   "Function to match comment inside heregex."
   (catch 'found
@@ -205,8 +207,6 @@
 (defun livescript--interpolatable-syntax-class-p (syntax-class)
   (not (and syntax-class
             (memq syntax-class livescript-interpolatable-syntax-classes))))
-
-(defvar livescript-heregex-face 'font-lock-constant-face)
 
 (defun livescript--get-face (point)
   (let ((face (get-text-property point 'face)))
@@ -303,15 +303,15 @@ SYNTAX is a string which `string-to-syntax' accepts."
 (defvar livescript--unclosed-positions nil
   "Unclosed literals and their positions.")
 
+(defconst livescript-complex-syntax '(\'\'\' \"\"\" <\\\[ //)
+  "List of symbols whose names are complex syntax elements.
+Complex syntax elements are heredocument, string list and heregexp.")
+
 (defun livescript--make-unclosed-positions ()
   (let ((tbl (make-hash-table :size 11)))
     (dolist (syntax livescript-complex-syntax)
       (puthash syntax nil tbl))
     tbl))
-
-(defconst livescript-complex-syntax '(\'\'\' \"\"\" <\\\[ //)
-  "List of symbols whose names are complex syntax elements.
-Complex syntax elements are heredocument, string list and heregexp.")
 
 (defun livescript--make-syntax-propertize-function ()
   "Return a function used for highlighting codes syntactically."
@@ -386,6 +386,7 @@ Complex syntax elements are heredocument, string list and heregexp.")
   (maphash #'(lambda (k v) (puthash k nil livescript--unclosed-positions))
            livescript--unclosed-positions))
 
+(defvar font-lock-beg)
 (defun livescript-font-lock-extend-region-function ()
   (let ((min-unclosed (livescript-minimum-unclosed)))
     (when (and min-unclosed (< (cdr min-unclosed) font-lock-beg))
