@@ -5,7 +5,7 @@
 ;; Author  : Hisamatsu Yasuyuki <yas@null.net>
 ;; URL     : https://github.com/yhisamatsu/livescript-mode
 ;; Keywords: languages livescript
-;; Version : 0.0.2
+;; Version : 0.0.3
 
 ;; This program is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
