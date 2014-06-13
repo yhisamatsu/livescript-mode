@@ -196,7 +196,9 @@
   '(font-lock-string-face font-lock-constant-face))
 
 (defun livescript--interpolatable-face-p (face)
-  (intersection face livescript-interpolatable-faces))
+  (catch 'found
+    (dolist (f face)
+      (when (memq f livescript-interpolatable-faces) (throw 'found t)))))
 
 (defvar livescript-interpolatable-syntax-classes '(6))
 
