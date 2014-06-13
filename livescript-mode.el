@@ -1,6 +1,6 @@
 ;;; livescript-mode.el --- Major mode for editing LiveScript files
 
-;; Copyright (C) 2012-2013 Hisamatsu Yasuyuki
+;; Copyright (C) 2012-2014 Hisamatsu Yasuyuki
 
 ;; Author  : Hisamatsu Yasuyuki <yas@null.net>
 ;; URL     : https://github.com/yhisamatsu/livescript-mode
