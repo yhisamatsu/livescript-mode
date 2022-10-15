@@ -6,6 +6,7 @@
 ;; URL     : https://github.com/yhisamatsu/livescript-mode
 ;; Keywords: languages livescript
 ;; Version : 0.0.3
+;; Package-Requires: ((emacs "24.3"))
 
 ;; This program is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -28,7 +29,8 @@
 
 (require 'font-lock)
 
-(eval-when-compile (require 'cl))
+(eval-when-compile
+  (require 'cl-lib))
 
 ;;
 ;; Group
@@ -283,10 +285,10 @@ SYNTAX is a string which `string-to-syntax' accepts."
   (put-text-property beg end 'syntax-table (string-to-syntax syntax)))
 
 (defun livescript--escape-syntax (beg end subst)
-  (loop for i from beg to end
-        do (let ((class (syntax-class (syntax-after i))))
-             (when (memq class livescript--conflicting-syntax-classes)
-               (livescript--put-syntax i (1+ i) subst)))))
+  (cl-loop for i from beg to end
+           do (let ((class (syntax-class (syntax-after i))))
+                (when (memq class livescript--conflicting-syntax-classes)
+                  (livescript--put-syntax i (1+ i) subst)))))
 
 (defun livescript--put-enclosing-syntax (beg end syntax &optional subst)
   (livescript--put-syntax beg (1+ beg) syntax)
@@ -417,7 +419,7 @@ Complex syntax elements are heredocument, string list and heregexp.")
 (defun livescript-syntactic-face-function (state)
   "Return one of font-lock's basic face according to the parser's STATE.
 STATE is a return value of `syntax-ppss'."
-  (case (livescript--string-state state)
+  (cl-case (livescript--string-state state)
     ((nil) 'font-lock-comment-face)
     ((?/)  'font-lock-constant-face)
     (t     'font-lock-string-face)))
