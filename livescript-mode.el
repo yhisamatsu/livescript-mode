@@ -1,4 +1,4 @@
-;;; livescript-mode.el --- Major mode for editing LiveScript files
+;;; livescript-mode.el --- Major mode for editing LiveScript files  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2012-2014 Hisamatsu Yasuyuki
 
@@ -395,13 +395,13 @@ Complex syntax elements are heredocument, string list and heregexp.")
 (defun livescript-minimum-unclosed ()
   "Return the position where the first unclosed syntax appears."
   (let (kv-alist)
-    (maphash #'(lambda (k v) (when v (push (cons k v) kv-alist)))
+    (maphash (lambda (k v) (when v (push (cons k v) kv-alist)))
              livescript--unclosed-positions)
     (when kv-alist
-      (car (sort kv-alist #'(lambda (a b) (< (cdr a) (cdr b))))))))
+      (car (sort kv-alist (lambda (a b) (< (cdr a) (cdr b))))))))
 
 (defun livescript--clear-unclosed-positions ()
-  (maphash #'(lambda (k v) (puthash k nil livescript--unclosed-positions))
+  (maphash (lambda (k _v) (puthash k nil livescript--unclosed-positions))
            livescript--unclosed-positions))
 
 (defvar font-lock-beg)
