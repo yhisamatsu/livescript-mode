@@ -28,6 +28,7 @@
 ;;; Code:
 
 (require 'font-lock)
+(require 'subr-x)
 
 (eval-when-compile
   (require 'cl-lib))
@@ -105,10 +106,8 @@
 ;; Utility
 
 (defun livescript--regexp-from-symbols (sequence)
+  "Return a regexp that matches any symbol in SEQUENCE."
   (concat "\\_<" (regexp-opt (mapcar #'symbol-name sequence) t) "\\>"))
-
-(defun livescript--join-string (strings separator)
-  (mapconcat #'identity strings separator))
 
 ;;
 ;; Search based highlighting
@@ -355,7 +354,7 @@ Complex syntax elements are heredocument, string list and heregexp.")
 
             ;; unclosed multiline literals
             ((let ((complex (mapcar #'symbol-name livescript-complex-syntax)))
-               (concat "\\(" (livescript--join-string complex "\\|") "\\)"))
+               (concat "\\(" (string-join complex "\\|") "\\)"))
              (1 (ignore
                  (puthash (intern-soft (match-string 1)) (match-beginning 1)
                           livescript--unclosed-positions))))
