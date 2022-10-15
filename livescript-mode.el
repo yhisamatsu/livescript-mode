@@ -1,4 +1,4 @@
-;;; livescript-mode.el --- Major mode for editing LiveScript files
+;;; livescript-mode.el --- Major mode for editing LiveScript files  -*- lexical-binding: t; -*-
 
 ;; Copyright (C) 2012-2014 Hisamatsu Yasuyuki
 
@@ -6,6 +6,7 @@
 ;; URL     : https://github.com/yhisamatsu/livescript-mode
 ;; Keywords: languages livescript
 ;; Version : 0.0.3
+;; Package-Requires: ((emacs "24.3"))
 
 ;; This program is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -27,8 +28,10 @@
 ;;; Code:
 
 (require 'font-lock)
+(require 'subr-x)
 
-(eval-when-compile (require 'cl))
+(eval-when-compile
+  (require 'cl-lib))
 
 ;;
 ;; Group
@@ -103,10 +106,8 @@
 ;; Utility
 
 (defun livescript--regexp-from-symbols (sequence)
+  "Return a regexp that matches any symbol in SEQUENCE."
   (concat "\\_<" (regexp-opt (mapcar #'symbol-name sequence) t) "\\>"))
-
-(defun livescript--join-string (strings separator)
-  (mapconcat #'identity strings separator))
 
 ;;
 ;; Search based highlighting
@@ -152,7 +153,7 @@
 
 (defvar livescript-function-name-regexp
   (let* ((param     "\\s-*\\(?:\\w\\|\\.\\)+\\s-*")
-         (default   "\\(?:\\(?:[:=?]\\|||\\)\\s-*\\|\\s-+or\\s-+\\)[^,\)]+?")
+         (default   "\\(?:\\(?:[:=?]\\|||\\)\\s-*\\|\\s-+or\\s-+\\)[^,\\)]+?")
          (arg       (concat param "\\(?:" default "\\)?"))
          (args      (concat arg "\\(?:," arg "\\)*"))
          (arrow     "\\(?:--?\\|~~?\\)>")
@@ -166,14 +167,14 @@
   "Regular expression to match function names.")
 
 (defvar livescript-class-name-regexp
-  "\\_<class\\s-+\\(?:exports\.\\)?\\(\\w+\\)"
+  "\\_<class\\s-+\\(?:exports\\.\\)?\\(\\w+\\)"
   "Regular expression to match class names.")
 
 (defun livescript-interpolation-matcher (bound)
   "Function to match interpolation."
   (catch 'found
     (while (re-search-forward
-			"\\(#\\(?:{\\(?2:.*?\\)\\}\\|\\w+\\)\\)"
+			"\\(#\\(?:{\\(?2:.*?\\)}\\|\\w+\\)\\)"
 			bound t)
       (let ((face         (livescript--get-face   (1- (point))))
             (syntax-class (livescript--get-syntax (match-beginning 1))))
@@ -273,8 +274,9 @@
 (defconst livescript--conflicting-syntax-classes
   (let ((string-quote   7)
         (escape         9)
-        (comment-start 11))
-    (list comment-start string-quote escape))
+        ;; `comment-start' is an existing dynamic variable.
+        (cmt-start     11))
+    (list cmt-start string-quote escape))
   "List of syntax classes which can conflict with syntax-table property.")
 
 (defun livescript--put-syntax (beg end syntax)
@@ -283,10 +285,10 @@ SYNTAX is a string which `string-to-syntax' accepts."
   (put-text-property beg end 'syntax-table (string-to-syntax syntax)))
 
 (defun livescript--escape-syntax (beg end subst)
-  (loop for i from beg to end
-        do (let ((class (syntax-class (syntax-after i))))
-             (when (memq class livescript--conflicting-syntax-classes)
-               (livescript--put-syntax i (1+ i) subst)))))
+  (cl-loop for i from beg to end
+           do (let ((class (syntax-class (syntax-after i))))
+                (when (memq class livescript--conflicting-syntax-classes)
+                  (livescript--put-syntax i (1+ i) subst)))))
 
 (defun livescript--put-enclosing-syntax (beg end syntax &optional subst)
   (livescript--put-syntax beg (1+ beg) syntax)
@@ -346,14 +348,14 @@ Complex syntax elements are heredocument, string list and heregexp.")
              (1 "\"/") (2 "\"/"))
 
             ;; \string
-            ("\\(\\\\[^[:space:]\n][^]}\),;[:space:]\n]*\\)"
+            ("\\(\\\\[^[:space:]\n][^]}\\),;[:space:]\n]*\\)"
              (1 (ignore
                  (livescript--put-enclosing-syntax
                   (match-beginning 1) (match-end 1) "|" "'"))))
 
             ;; unclosed multiline literals
             ((let ((complex (mapcar #'symbol-name livescript-complex-syntax)))
-               (concat "\\(" (livescript--join-string complex "\\|") "\\)"))
+               (concat "\\(" (string-join complex "\\|") "\\)"))
              (1 (ignore
                  (puthash (intern-soft (match-string 1)) (match-beginning 1)
                           livescript--unclosed-positions))))
@@ -394,13 +396,13 @@ Complex syntax elements are heredocument, string list and heregexp.")
 (defun livescript-minimum-unclosed ()
   "Return the position where the first unclosed syntax appears."
   (let (kv-alist)
-    (maphash #'(lambda (k v) (when v (push (cons k v) kv-alist)))
+    (maphash (lambda (k v) (when v (push (cons k v) kv-alist)))
              livescript--unclosed-positions)
     (when kv-alist
-      (car (sort kv-alist #'(lambda (a b) (< (cdr a) (cdr b))))))))
+      (car (sort kv-alist (lambda (a b) (< (cdr a) (cdr b))))))))
 
 (defun livescript--clear-unclosed-positions ()
-  (maphash #'(lambda (k v) (puthash k nil livescript--unclosed-positions))
+  (maphash (lambda (k _v) (puthash k nil livescript--unclosed-positions))
            livescript--unclosed-positions))
 
 (defvar font-lock-beg)
@@ -417,7 +419,7 @@ Complex syntax elements are heredocument, string list and heregexp.")
 (defun livescript-syntactic-face-function (state)
   "Return one of font-lock's basic face according to the parser's STATE.
 STATE is a return value of `syntax-ppss'."
-  (case (livescript--string-state state)
+  (cl-case (livescript--string-state state)
     ((nil) 'font-lock-comment-face)
     ((?/)  'font-lock-constant-face)
     (t     'font-lock-string-face)))
