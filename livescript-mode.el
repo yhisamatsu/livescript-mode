@@ -154,7 +154,7 @@
 
 (defvar livescript-function-name-regexp
   (let* ((param     "\\s-*\\(?:\\w\\|\\.\\)+\\s-*")
-         (default   "\\(?:\\(?:[:=?]\\|||\\)\\s-*\\|\\s-+or\\s-+\\)[^,\)]+?")
+         (default   "\\(?:\\(?:[:=?]\\|||\\)\\s-*\\|\\s-+or\\s-+\\)[^,\\)]+?")
          (arg       (concat param "\\(?:" default "\\)?"))
          (args      (concat arg "\\(?:," arg "\\)*"))
          (arrow     "\\(?:--?\\|~~?\\)>")
@@ -168,14 +168,14 @@
   "Regular expression to match function names.")
 
 (defvar livescript-class-name-regexp
-  "\\_<class\\s-+\\(?:exports\.\\)?\\(\\w+\\)"
+  "\\_<class\\s-+\\(?:exports\\.\\)?\\(\\w+\\)"
   "Regular expression to match class names.")
 
 (defun livescript-interpolation-matcher (bound)
   "Function to match interpolation."
   (catch 'found
     (while (re-search-forward
-			"\\(#\\(?:{\\(?2:.*?\\)\\}\\|\\w+\\)\\)"
+			"\\(#\\(?:{\\(?2:.*?\\)}\\|\\w+\\)\\)"
 			bound t)
       (let ((face         (livescript--get-face   (1- (point))))
             (syntax-class (livescript--get-syntax (match-beginning 1))))
@@ -348,7 +348,7 @@ Complex syntax elements are heredocument, string list and heregexp.")
              (1 "\"/") (2 "\"/"))
 
             ;; \string
-            ("\\(\\\\[^[:space:]\n][^]}\),;[:space:]\n]*\\)"
+            ("\\(\\\\[^[:space:]\n][^]}\\),;[:space:]\n]*\\)"
              (1 (ignore
                  (livescript--put-enclosing-syntax
                   (match-beginning 1) (match-end 1) "|" "'"))))
