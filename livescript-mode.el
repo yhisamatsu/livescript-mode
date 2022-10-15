@@ -274,8 +274,9 @@
 (defconst livescript--conflicting-syntax-classes
   (let ((string-quote   7)
         (escape         9)
-        (comment-start 11))
-    (list comment-start string-quote escape))
+        ;; `comment-start' is an existing dynamic variable.
+        (cmt-start     11))
+    (list cmt-start string-quote escape))
   "List of syntax classes which can conflict with syntax-table property.")
 
 (defun livescript--put-syntax (beg end syntax)
